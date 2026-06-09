@@ -2,230 +2,238 @@ import streamlit as st
 import random
 
 st.set_page_config(
-    page_title="🌈 MBTI 진로 탐험대",
-    page_icon="🚀",
+    page_title="🪑 자리 배치 프로그램",
+    page_icon="🪑",
     layout="wide"
 )
 
-# --------------------------
-# MBTI 데이터
-# --------------------------
+# -------------------
+# 세션 상태
+# -------------------
+if "blocked" not in st.session_state:
+    st.session_state.blocked = set()
 
-career_data = {
-    "INTJ": {
-        "emoji": "🧠",
-        "jobs": ["과학자", "데이터 분석가", "AI 개발자", "연구원", "전략기획가"],
-        "major": ["컴퓨터공학", "물리학", "수학", "통계학"],
-        "person": "일론 머스크"
-    },
-    "INTP": {
-        "emoji": "🔬",
-        "jobs": ["프로그래머", "발명가", "교수", "시스템 설계자", "엔지니어"],
-        "major": ["컴퓨터공학", "전자공학", "철학"],
-        "person": "알베르트 아인슈타인"
-    },
-    "ENTJ": {
-        "emoji": "👑",
-        "jobs": ["CEO", "변호사", "정치인", "사업가", "프로젝트 관리자"],
-        "major": ["경영학", "법학", "행정학"],
-        "person": "스티브 잡스"
-    },
-    "ENTP": {
-        "emoji": "💡",
-        "jobs": ["창업가", "마케팅 전문가", "발명가", "광고기획자"],
-        "major": ["경영학", "광고홍보학"],
-        "person": "토머스 에디슨"
-    },
-    "INFJ": {
-        "emoji": "🌱",
-        "jobs": ["상담사", "심리학자", "교사", "작가"],
-        "major": ["교육학", "심리학", "사회복지학"],
-        "person": "넬슨 만델라"
-    },
-    "INFP": {
-        "emoji": "🎨",
-        "jobs": ["작가", "예술가", "디자이너", "상담사"],
-        "major": ["문예창작", "디자인", "심리학"],
-        "person": "J.K. 롤링"
-    },
-    "ENFJ": {
-        "emoji": "🤝",
-        "jobs": ["교사", "상담사", "HR 전문가", "사회복지사"],
-        "major": ["교육학", "심리학"],
-        "person": "오프라 윈프리"
-    },
-    "ENFP": {
-        "emoji": "🎉",
-        "jobs": ["유튜버", "기획자", "마케터", "방송인"],
-        "major": ["미디어학", "광고홍보학"],
-        "person": "로빈 윌리엄스"
-    },
-    "ISTJ": {
-        "emoji": "📋",
-        "jobs": ["공무원", "회계사", "판사", "행정가"],
-        "major": ["행정학", "회계학", "법학"],
-        "person": "워런 버핏"
-    },
-    "ISFJ": {
-        "emoji": "💖",
-        "jobs": ["간호사", "교사", "사회복지사"],
-        "major": ["간호학", "교육학"],
-        "person": "마더 테레사"
-    },
-    "ESTJ": {
-        "emoji": "🏆",
-        "jobs": ["경영자", "군인", "행정가"],
-        "major": ["경영학", "행정학"],
-        "person": "존 D. 록펠러"
-    },
-    "ESFJ": {
-        "emoji": "😊",
-        "jobs": ["교사", "간호사", "서비스 관리자"],
-        "major": ["교육학", "간호학"],
-        "person": "테일러 스위프트"
-    },
-    "ISTP": {
-        "emoji": "🛠️",
-        "jobs": ["정비사", "파일럿", "엔지니어"],
-        "major": ["기계공학", "항공학"],
-        "person": "베어 그릴스"
-    },
-    "ISFP": {
-        "emoji": "🎵",
-        "jobs": ["음악가", "디자이너", "사진작가"],
-        "major": ["음악", "디자인"],
-        "person": "마이클 잭슨"
-    },
-    "ESTP": {
-        "emoji": "⚡",
-        "jobs": ["기업가", "영업 전문가", "운동선수"],
-        "major": ["경영학", "체육학"],
-        "person": "도널드 트럼프"
-    },
-    "ESFP": {
-        "emoji": "🌟",
-        "jobs": ["연예인", "방송인", "이벤트 기획자"],
-        "major": ["연극영화", "미디어학"],
-        "person": "엘튼 존"
-    }
-}
+if "seats" not in st.session_state:
+    st.session_state.seats = []
 
-# --------------------------
-# 디자인
-# --------------------------
+# -------------------
+# 제목
+# -------------------
+st.title("🪑 랜덤 자리 배치")
+st.write("### ❌ 사용할 수 없는 자리를 선택하세요")
 
-st.markdown("""
-<style>
-.main {
-    background-color:#F8FBFF;
-}
-.big-title{
-    text-align:center;
-    font-size:55px;
-    font-weight:bold;
-    color:#4B6CB7;
-}
-.sub{
-    text-align:center;
-    font-size:24px;
-}
-.result-box{
-    padding:20px;
-    border-radius:20px;
-    background:#EEF5FF;
-    margin-top:10px;
-}
-</style>
-""", unsafe_allow_html=True)
+# -------------------
+# 자리 선택
+# -------------------
 
-# --------------------------
-# 헤더
-# --------------------------
+for row in range(5):
 
-st.markdown(
-    '<div class="big-title">🚀 MBTI 진로 탐험대 🌈</div>',
-    unsafe_allow_html=True
+    cols = st.columns(6)
+
+    for col in range(6):
+
+        seat_num = row * 6 + col + 1
+
+        blocked = seat_num in st.session_state.blocked
+
+        label = f"❌ {seat_num}" if blocked else f"{seat_num}"
+
+        if cols[col].button(
+            label,
+            key=f"seat_{seat_num}",
+            use_container_width=True
+        ):
+
+            if blocked:
+                st.session_state.blocked.remove(seat_num)
+            else:
+                st.session_state.blocked.add(seat_num)
+
+            st.rerun()
+
+st.divider()
+
+# -------------------
+# 배치 형태
+# -------------------
+
+seat_type = st.radio(
+    "🪑 자리 형태 선택",
+    ["1인용 (6×5)", "2인용 (3분단)"],
+    horizontal=True
 )
 
-st.markdown(
-    '<div class="sub">✨ 나의 MBTI로 미래 직업을 탐험해보자! ✨</div>',
-    unsafe_allow_html=True
+# -------------------
+# 자리 뽑기
+# -------------------
+
+available = [
+    i for i in range(1, 31)
+    if i not in st.session_state.blocked
+]
+
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("🎲 자리 뽑기", use_container_width=True):
+
+        students = list(range(1, len(available)+1))
+
+        random.shuffle(students)
+
+        st.session_state.seats = students
+
+with col2:
+    if st.button("🔄 다시 섞기", use_container_width=True):
+
+        if st.session_state.seats:
+
+            students = st.session_state.seats.copy()
+
+            random.shuffle(students)
+
+            st.session_state.seats = students
+
+# -------------------
+# 정보 표시
+# -------------------
+
+st.sidebar.header("📊 현황")
+
+st.sidebar.metric(
+    "사용 가능 자리",
+    len(available)
 )
 
-st.write("")
-st.balloons()
-
-# --------------------------
-# 선택
-# --------------------------
-
-mbti = st.selectbox(
-    "🧩 나의 MBTI를 선택하세요",
-    list(career_data.keys())
+st.sidebar.metric(
+    "제외된 자리",
+    len(st.session_state.blocked)
 )
 
-# --------------------------
-# 결과 버튼
-# --------------------------
+# -------------------
+# 결과 출력
+# -------------------
 
-if st.button("🔮 미래 직업 보기"):
+if st.session_state.seats:
 
-    data = career_data[mbti]
+    st.divider()
+    st.header("📋 자리 배치 결과")
 
-    st.success(f"{data['emoji']} 당신의 MBTI는 {mbti} 입니다!")
+    students = st.session_state.seats
 
-    col1, col2 = st.columns(2)
+    seat_map = {}
 
-    with col1:
-        st.markdown("### 💼 추천 직업")
+    for seat_num, student_num in zip(
+        available,
+        students
+    ):
+        seat_map[seat_num] = student_num
 
-        for job in data["jobs"]:
-            st.write(f"✅ {job}")
+    # -------------------
+    # 1인용
+    # -------------------
 
-    with col2:
-        st.markdown("### 🎓 추천 학과")
+    if seat_type == "1인용 (6×5)":
 
-        for major in data["major"]:
-            st.write(f"📚 {major}")
+        for row in range(5):
 
-    st.markdown("---")
+            cols = st.columns(6)
 
-    st.markdown("### 🌟 닮은 유명인")
+            for col in range(6):
 
-    st.info(f"🎤 {data['person']}")
+                seat_num = row * 6 + col + 1
 
-    st.markdown("---")
+                if seat_num in st.session_state.blocked:
 
-    strengths = [
-        "창의력이 뛰어나요 🎨",
-        "문제 해결 능력이 뛰어나요 🧠",
-        "사람들과 협력하는 능력이 좋아요 🤝",
-        "리더십이 강해요 👑",
-        "도전 정신이 뛰어나요 🚀",
-        "세심하고 책임감이 강해요 📋"
-    ]
+                    text = "❌"
+                    border = "red"
 
-    st.markdown("### 💖 나의 강점")
+                elif seat_num in seat_map:
 
-    st.success(random.choice(strengths))
+                    text = f"👨‍🎓 {seat_map[seat_num]}"
+                    border = "#4CAF50"
 
-    st.markdown("---")
+                else:
 
-    st.markdown(
-        f"""
-        ## 🎯 진로 한 줄 조언
+                    text = ""
+                    border = "gray"
 
-        > {mbti} 유형은 자신의 강점을 살릴 수 있는 분야를 찾을 때 가장 크게 성장할 수 있습니다!
-        >
-        > 🌈 다양한 경험을 하며 자신만의 꿈을 찾아보세요.
-        """
-    )
+                cols[col].markdown(
+                    f"""
+                    <div style="
+                        height:80px;
+                        border:3px solid {border};
+                        border-radius:10px;
+                        text-align:center;
+                        padding-top:20px;
+                        font-size:22px;
+                        font-weight:bold;
+                    ">
+                    {text}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
-    st.snow()
+    # -------------------
+    # 2인용
+    # -------------------
 
-# --------------------------
-# 하단
-# --------------------------
+    else:
 
-st.markdown("---")
-st.caption("🏫 MBTI 진로 탐험대 | 진로교육용 웹앱")
+        idx = 0
+
+        for section in range(3):
+
+            st.subheader(f"🏫 {section+1}분단")
+
+            for row in range(5):
+
+                cols = st.columns(2)
+
+                left = ""
+                right = ""
+
+                if idx < len(students):
+                    left = f"👨‍🎓 {students[idx]}"
+                    idx += 1
+
+                if idx < len(students):
+                    right = f"👨‍🎓 {students[idx]}"
+                    idx += 1
+
+                cols[0].markdown(
+                    f"""
+                    <div style="
+                        border:3px solid #2196F3;
+                        border-radius:10px;
+                        height:80px;
+                        text-align:center;
+                        padding-top:20px;
+                        font-size:22px;
+                        font-weight:bold;
+                    ">
+                    {left}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                cols[1].markdown(
+                    f"""
+                    <div style="
+                        border:3px solid #2196F3;
+                        border-radius:10px;
+                        height:80px;
+                        text-align:center;
+                        padding-top:20px;
+                        font-size:22px;
+                        font-weight:bold;
+                    ">
+                    {right}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            st.divider()
